@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MessagePack Editor</title>
+<script src="https://raw.github.com/msgpack/msgpack-javascript/master/msgpack.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<style type="text/css">
+@import url(http://meyerweb.com/eric/tools/css/reset/reset.css);
+@import url(http://fonts.googleapis.com/css?family=Press+Start+2P|Oxygen+Mono);
+	body
+	{
+		background-image: url("http://www.psdgraphics.com/file/light-blue-abstract.jpg");
+		background-size: cover;
+        text-align: center;
+	}
+	h1
+	{
+		margin: 20px;
+		font-size: 30px;
+		color: #3fb8e8;
+		font-family: 'Press Start 2P', cursive;
+	}
+	textarea
+	{
+		border: 2px solid #aaa;
+		width: 512px;
+		margin: 0px 10px;
+		background-color: rgba(255,255,255,0.5);
+		font-family: 'Oxygen Mono', sans-serif;
+		color: #333;
+		border-radius: 5px;
+		resize: none;
+	}
+	a.button 
+	{
+		margin: -90px 10px 10px 10px;
+		padding: 14px 26px;
+		font-size: 14px;
+		line-height: 100%;
+		color: #EEEEEE;
+		display: inline-block;
+		vertical-align: middle;
+		text-align: center;
+		cursor: pointer;
+		font-weight: bold;
+		transition: background 0.1s ease-in-out;
+		border-radius: 3px;
+		font-family: 'Press Start 2P', cursive;
+		background-color: #3fb8e8;
+		box-shadow: 0px 3px 0px 0px #3293ba;
+		outline: 0 none;
+		text-decoration: none;
+	}
+	a.button:active 
+	{
+		transition: background 0.1s ease-in-out;
+	    margin-bottom: 7px;
+	    box-shadow: 0px 1px 0px 0px #3293ba;
+	}
+	a.button:hover
+	{
+		transition: background 0.1s ease-in-out;
+		background-color: #1baae3;
+	}
+
+</style>
+</head>
+
+<body>
+	<h1>MessagePack Editor</h1>
+	<form>
+	<textarea id="mpack" rows="20" placeholder="Message Pack (Hex)"></textarea>	
+	<textarea id="json" rows="20" placeholder="JSON"></textarea>
+	</form>
+	<a class="button" id="updateJSON" >>>></a>
+	<a class="button" id="updateMPACK"><<<</a>
+</body>
+
+<script>
+function parseHexString(str) { 
+	var result = [];
+	while (str.length >= 2) { 
+	    result.push(parseInt(str.substring(0, 2), 16));
+	    str = str.substring(2, str.length);
+	}
+	return result; 
+}
+
+function createHexString(arr) {
+    var result = "";
+    for (i in arr) {
+        var str = arr[i].toString(16);
+        str = str.length == 0 ? "00" :
+              str.length == 1 ? "0" + str : 
+              str.length == 2 ? str :
+              str.substring(str.length-2, str.length);
+        result += str;
+    }
+    return result;
+}
+
+$(document).ready(function() {
+	$('#updateMPACK').click(function() {
+		var json = $('#json').val();
+		console.log(json);
+		console.log("<<<");
+		var object = JSON.parse(json);
+		var bytes = msgpack.pack(object, false);
+		var hexString = createHexString(bytes);
+		console.log(hexString);
+		$('#mpack').val(hexString);
+	});
+	$('#updateJSON').click(function() {
+		var mpack =  $('#mpack').val().replace(/ |\r|\n/g, ''); 
+		console.log(mpack);
+		console.log(">>>");
+		var decString = parseHexString(mpack);
+        var object = msgpack.unpack(decString);
+		var json = JSON.stringify(object)
+		console.log(json);
+		$('#json').val(json);
+	});
+});
+</script>
+
+</html>
